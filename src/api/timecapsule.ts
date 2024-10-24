@@ -1,6 +1,6 @@
 import { api } from "@/utils/customAxios";
 
-// 타임캡슐 생성 함수 (localStorage에 저장)
+// 타임캡슐 생성 함수 (백엔드 연결)
 export const createTimeCapsule = async (
   mailAddress: string,
   content: string,
@@ -9,124 +9,89 @@ export const createTimeCapsule = async (
 ) => {
   // token에서 userId와 nickname을 가져옴
   const token = JSON.parse(localStorage.getItem("token") || "{}");
-  const userId = token.userId;
-  const nickname = token.nickname;
 
-  if (!userId || !nickname) {
+  if (!!token) {
     console.error(
-      "Error: token에 userId 또는 nickname이 없습니다. 로그인 여부를 확인하세요."
+      "Error: 로그인 여부를 확인하세요."
     );
     return;
   }
 
-  // 백엔드 연결 후 주석 해제
-  /*
+  // FormData 생성
   const formData = new FormData();
+  formData.append("request", JSON.stringify({
+    mail_address: mailAddress,
+    content: content,
+    is_public: isPublic,
+  }));
+
+  // 이미지 파일 추가
+  images.forEach((image, index) => {
+    formData.append(`images[${index}]`, image);
+  });
+
   try {
-    const response = await api.post("/api/v1/timecapsules", formData, {
+    // 백엔드로 POST 요청
+    const response = await api.post("/timecapsules", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     });
-    return response.data;
+
+    return response.data; // 성공적으로 응답을 받은 경우 데이터 반환
   } catch (error) {
     console.error("타임캡슐 생성 중 오류 발생:", error);
-    throw error;
+    throw error; // 에러 발생 시 오류를 던짐
   }
-  */
-
-  // localStorage에 저장하는 방식 (백엔드 연결 전)
-  const currentTimeCapsules = JSON.parse(
-    localStorage.getItem("timecapsules") || "[]"
-  );
-
-  const newCapsule = {
-    id: currentTimeCapsules.length + 1, // 고유 ID
-    mailAddress,
-    nickname,
-    content,
-    isPublic,
-    userId,
-    images: images.map((image) => URL.createObjectURL(image)),
-    created_at: new Date().toISOString(),
-  };
-
-  currentTimeCapsules.push(newCapsule);
-  localStorage.setItem("timecapsules", JSON.stringify(currentTimeCapsules));
-
-  console.log("타임캡슐 생성", newCapsule);
-  return {
-    success: true,
-    data: newCapsule,
-  };
 };
 
-// 타임캡슐 공개글 조회 함수 (localStorage에서 가져오기)
+
+// 타임캡슐 공개글 조회 함수 (백엔드 연결)
 export const getPublicTimeCapsules = async () => {
   const token = JSON.parse(localStorage.getItem("token") || "{}");
   const userId = token.userId;
 
   if (!userId) {
-    console.error(
-      "Error: token에 userId가 없습니다. 로그인 여부를 확인하세요."
-    );
+    console.error("Error: token에 userId가 없습니다. 로그인 여부를 확인하세요.");
     return;
   }
 
-  // 백엔드 연결 시 사용
-  /*
   try {
-    const response = await api.get("/api/v1/timecapsules");
-    return response.data;
+    // 백엔드에서 공개 타임캡슐을 가져옴
+    const response = await api.get("/timecapsules");
+
+    // 서버 응답 구조에 맞게 데이터 파싱
+    const { success, data, error } = response.data;
+    
+    if (!success || error) {
+      console.error("타임캡슐 조회 중 오류 발생:", error);
+      return { success: false, error };
+    }
+
+    const { timecapsules } = data;
+
+    console.log("타임캡슐 조회 중", timecapsules);
+    return {
+      success: true,
+      timecapsules,
+    };
   } catch (error) {
     console.error("타임캡슐 조회 중 오류 발생:", error);
     throw error;
   }
-  */
-
-  // localStorage에서 타임캡슐을 가져옴
-  const currentTimeCapsules = JSON.parse(
-    localStorage.getItem("timecapsules") || "[]"
-  );
-
-   // 공개된 타임캡슐만 필터링
-   const publicTimecapsules = currentTimeCapsules.filter(
-    (capsule: any) => capsule.isPublic
-  );
-
-
-  console.log("타임캡슐 조회 중", currentTimeCapsules);
-  return {
-    success: true,
-    publicTimecapsules,
-  };
 };
 
-// 타임캡슐 삭제 함수 (localStorage에서 삭제)
+
+// 타임캡슐 삭제 함수 (백엔드 연결)
 export const deleteTimeCapsule = async (timeCapsuleId: number) => {
-  // 백엔드 연결 시 사용
-  /*
   try {
-    const response = await api.delete(`/api/v1/timecapsules/${timeCapsuleId}`);
-    return response.data;
+    // 백엔드로 DELETE 요청을 보냄
+    const response = await api.delete(`/timecapsules/${timeCapsuleId}`);
+
+    console.log(`타임캡슐 삭제 성공 ID: ${timeCapsuleId}`);
+    return response.data; // 서버로부터 응답 데이터를 반환
   } catch (error) {
     console.error("타임캡슐 삭제 중 오류 발생:", error);
-    throw error;
+    throw error; // 에러 발생 시 오류를 던짐
   }
-  */
-
-  // localStorage에서 타임캡슐 삭제
-  const currentTimeCapsules = JSON.parse(
-    localStorage.getItem("timecapsules") || "[]"
-  );
-  const updatedCapsules = currentTimeCapsules.filter(
-    (capsule: any) => capsule.id !== timeCapsuleId
-  );
-
-  localStorage.setItem("timecapsules", JSON.stringify(updatedCapsules));
-
-  console.log(`타임캡슐 삭제 ID: ${timeCapsuleId}`);
-  return {
-    success: true,
-  };
 };
