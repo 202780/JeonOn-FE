@@ -5,16 +5,20 @@ import Layout from './components/Layout';
 import Feedback from './pages/Feedback';
 import TimeCapsule from './pages/TimeCapsule';
 import Guide from './pages/Guide/Guide';
+import GuideDetail from './pages/Guide/GuideDetail';
 import TimeTable from './pages/TimeTable';
 import Booth from './pages/Booth';
 import MyPage from './pages/Mypage/MyPage';
 import Favorites from './pages/Mypage/Favorites';
-import MyContents from './pages/Mypage/Contents';
 import Affiliation from './pages/Mypage/Affiliation';
-import GuideDetail from './pages/Guide/GuideDetail';
+import MyBooth from './pages/Mypage/MyBooth';
+import MyContents from './pages/Mypage/Contents';
 import Contents from './pages/Contents/Contents';
 import ContentsDetail from './pages/Contents/ContentsDetail';
-import MyBooth from './pages/Mypage/MyBooth';
+import RegisterAffiliate from './pages/AdminPage/RegisterAffilate';
+import RegisterMap from './pages/AdminPage/RegisterMap';
+import RegisterBooth from './pages/AdminPage/RegisterBooth';
+import ViewFeedback from './pages/AdminPage/ViewFeedback';
 import RegisterContents from './pages/AdminPage/RegisterContents';
 
 const router = createBrowserRouter([
@@ -79,6 +83,22 @@ const router = createBrowserRouter([
       {
         path: '/my-page/favorites/booth',
         element: <MyBooth />,
+      },
+      {
+        path: '/admin-page/register-map',
+        element: <RegisterMap />,
+      },
+      {
+        path: '/admin-page/register-affiliate',
+        element: <RegisterAffiliate />,
+      },
+      {
+        path: '/admin-page/view-feedback',
+        element: <ViewFeedback />,
+      },
+      {
+        path: '/admin-page/register-booth',
+        element: <RegisterBooth />,
       },
       {
         path: '/admin-page/register-contents',

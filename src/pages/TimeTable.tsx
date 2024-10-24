@@ -23,7 +23,7 @@ export default function TimeTable() {
   });
 
   return (
-    <div className="h-screen w-screen flex flex-col font-pretendard">
+    <div className="h-full w-full min-h-screen flex flex-col font-pretendard">
       <div className="flex justify-center items-center">
         <h1 className="text-main text-4xl font-cafe24">타임테이블</h1>
       </div>

@@ -1,164 +1,136 @@
-import React, { useCallback, useRef, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
-import { EmblaOptionsType } from "embla-carousel";
-import { events, EventType } from "@/constants/events";
+import { EmblaCarouselType } from "embla-carousel";
+import { EventType, events } from "@/constants/events";
+import location_white from "@/../public/assets/svgs/location_white.svg";
+import clock from "@/../public/assets/svgs/clock.svg";
 
 const TWEEN_FACTOR_BASE = 0.52;
+
+// Special guest carousel wrapper component
+const SpecialGuestCarousel = () => {
+  // special이 true인 이벤트들만 필터링
+  const specialEvents = events.filter((event) => event.special);
+
+  return <EmblaCarousel slides={specialEvents} />;
+};
+
+type EmblaCarouselProps = {
+  slides: EventType[];
+};
 
 const numberWithinRange = (number: number, min: number, max: number): number =>
   Math.min(Math.max(number, min), max);
 
-const EmblaCarousel: React.FC = () => {
-  const options: EmblaOptionsType = {
-    loop: false,
-    align: "center",
-  };
-
-  const [emblaRef, emblaApi] = useEmblaCarousel(options);
-  const [selectedIndex, setSelectedIndex] = useState(0); // 현재 선택된 슬라이드 인덱스
-  const tweenFactor = useRef<number>(0);
+const EmblaCarousel: React.FC<EmblaCarouselProps> = ({ slides }) => {
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
+  const tweenFactor = useRef(0);
   const tweenNodes = useRef<HTMLElement[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
-  const setTweenNodes = useCallback((): void => {
-    if (!emblaApi) return; // emblaApi가 초기화되었는지 확인
-    tweenNodes.current = emblaApi.slideNodes().map((slideNode: HTMLElement) => {
-      return slideNode.querySelector(".embla__slide__content") as HTMLElement;
-    });
-  }, [emblaApi]);
+  const setTweenNodes = useCallback((emblaApi: EmblaCarouselType) => {
+    tweenNodes.current = emblaApi
+      .slideNodes()
+      .map(
+        (slideNode: HTMLElement) =>
+          slideNode.querySelector(".embla__slide__number") as HTMLElement
+      );
+  }, []);
 
-  const setTweenFactor = useCallback((): void => {
-    if (!emblaApi) return; // emblaApi가 초기화되었는지 확인
+  const setTweenFactor = useCallback((emblaApi: EmblaCarouselType) => {
     tweenFactor.current = TWEEN_FACTOR_BASE * emblaApi.scrollSnapList().length;
-  }, [emblaApi]);
+  }, []);
 
-  const tweenScale = useCallback((): void => {
-    if (!emblaApi) return; // emblaApi가 초기화되었는지 확인
-    const scrollProgress = emblaApi.scrollProgress(); // 현재 스크롤 위치를 반환
-    const slidesInView = emblaApi.slidesInView(); // 화면에 보이는 슬라이드 인덱스
+  const tweenScale = useCallback((emblaApi: EmblaCarouselType) => {
+    const engine = emblaApi.internalEngine();
+    const scrollProgress = emblaApi.scrollProgress();
+    const slidesInView = emblaApi.slidesInView();
 
-    emblaApi
-      .scrollSnapList()
-      .forEach((scrollSnap: number, snapIndex: number) => {
-        const diffToTarget = scrollSnap - scrollProgress;
-        const tweenValue = 1 - Math.abs(diffToTarget * tweenFactor.current); // 중앙에 가까울수록 tweenValue가 1에 가까워짐
-        const scale = numberWithinRange(tweenValue, 0.85, 1).toString(); // 0.85 ~ 1 범위의 스케일 값을 계산
-        const tweenNode = tweenNodes.current[snapIndex];
+    emblaApi.scrollSnapList().forEach((scrollSnap, snapIndex) => {
+      const diffToTarget = scrollSnap - scrollProgress;
+      const slidesInSnap = engine.slideRegistry[snapIndex];
 
-        if (tweenNode) {
-          // 중앙에 가장 가까운 슬라이드만 scale 적용
-          if (slidesInView.includes(snapIndex)) {
-            tweenNode.style.transform = `scale(${scale})`;
-          } else {
-            tweenNode.style.transform = `scale(0.85)`; // 중앙에서 벗어난 슬라이드는 기본 크기
-          }
-        }
+      slidesInSnap.forEach((slideIndex) => {
+        if (!slidesInView.includes(slideIndex)) return;
+
+        const tweenValue = 1 - Math.abs(diffToTarget * tweenFactor.current);
+        const scale = numberWithinRange(tweenValue, 0, 1).toString();
+        const tweenNode = tweenNodes.current[slideIndex];
+        if (tweenNode) tweenNode.style.transform = `scale(${scale})`;
       });
-  }, [emblaApi]);
-
-  // 슬라이드 선택 이벤트 핸들러
-  const onSelect = useCallback((): void => {
-    if (!emblaApi) return; // emblaApi가 초기화되었는지 확인
-    const index = emblaApi.selectedScrollSnap(); // 현재 선택된 슬라이드의 인덱스 가져오기
-    setSelectedIndex(index); // 선택된 인덱스를 상태로 저장
-  }, [emblaApi]);
+    });
+  }, []);
 
   useEffect(() => {
-    if (!emblaApi) return; // emblaApi가 초기화되었는지 확인
+    if (!emblaApi) return;
 
-    setTweenNodes();
-    setTweenFactor();
-    tweenScale();
+    setTweenNodes(emblaApi);
+    setTweenFactor(emblaApi);
+    tweenScale(emblaApi);
 
-    emblaApi.on("reInit", () => {
-      setTweenNodes();
-      setTweenFactor();
-      tweenScale();
-    });
-    emblaApi.on("scroll", tweenScale); // 인수 전달 없이 함수만 참조
-    emblaApi.on("select", onSelect); // 인수 전달 없이 함수만 참조
-
-    return () => {
-      if (emblaApi) {
-        emblaApi.off("select", onSelect);
-        emblaApi.off("scroll", tweenScale); // 이벤트 리스너 제거
-      }
-    };
-  }, [emblaApi, tweenScale, setTweenNodes, setTweenFactor, onSelect]);
-
-  const specialGuests: EventType[] = events.filter(
-    (event) => event.special === true
-  );
-
-  const virtualGuests: EventType[] = [
-    {
-      order: 0,
-      start: "",
-      end: "",
-      content: "virtual",
-      location: "",
-      special: true,
-      img: "",
-    },
-    ...specialGuests,
-    {
-      order: events.length + 1,
-      start: "",
-      end: "",
-      content: "virtual",
-      location: "",
-      special: true,
-      img: "",
-    },
-  ];
-
-  const realSelectedIndex = selectedIndex - 1; // 가상 슬라이드를 제외한 실제 슬라이드의 인덱스 계산
-
-  const selectedGuest =
-    realSelectedIndex >= 0 && realSelectedIndex < specialGuests.length
-      ? specialGuests[realSelectedIndex]
-      : null;
+    emblaApi
+      .on("reInit", setTweenNodes)
+      .on("reInit", setTweenFactor)
+      .on("scroll", tweenScale)
+      .on("select", () => {
+        const index = emblaApi.selectedScrollSnap();
+        setSelectedIndex(index);
+      });
+  }, [emblaApi, setTweenNodes, setTweenFactor, tweenScale]);
 
   return (
-    <div className="embla w-full max-w-4xl mx-auto">
+    <div className="embla w-full">
       <div className="embla__viewport overflow-hidden" ref={emblaRef}>
         <div className="embla__container flex">
-          {virtualGuests.map((guest, index) => (
+          {slides.map((event) => (
             <div
-              key={index}
-              className={`embla__slide flex-none ${
-                guest.content === "virtual" ? "w-8" : "w-36"
-              }`}
-              style={
-                guest.content === "virtual"
-                  ? { pointerEvents: "none", opacity: 0 }
-                  : {}
-              }
+              className="embla__slide flex-shrink-0 w-[55%] pl-4"
+              key={event.order}
             >
-              {guest.content === "virtual" ? (
-                <div className="embla__slide__content"></div>
-              ) : (
-                <div className="embla__slide__content bg-white w-36 h-36 rounded-xl flex items-center justify-center transition-transform duration-300 ease-out">
-                  <img
-                    src={guest.img}
-                    alt={guest.content}
-                    className="object-cover rounded-xl"
-                  />
-                </div>
-              )}
+              <div className="embla__slide__number flex justify-center items-center bg-gray-200 h-48 rounded-lg text-4xl">
+                {event.img}
+              </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* 선택된 슬라이드의 이름을 박스 아래에 표시 */}
-      {/* mt-2로 간격을 줄여서 캐러셀과 텍스트 사이의 공간을 줄임 */}
-      {selectedGuest && (
-        <div className="mt-2 font-neurimbo text-center text-lg font-bold text-main">
-          {selectedGuest?.content || ""}
+      <div className="mt-4 mb-10 gap-2 text-center flex flex-col justify-center">
+        <div className="text-xl font-cafe24 text-main">
+          {slides[selectedIndex].content}
         </div>
-      )}
+        <div className="flex flex-col text-xs gap-2 font-pretendard text-white">
+          <div className="flex flex-row justify-center gap-1">
+            <img src={location_white} />
+            <p>{slides[selectedIndex].location}</p>
+          </div>
+          <div className="flex flex-row justify-center gap-1">
+            <img src={clock} />
+            <p>
+              {new Date(slides[selectedIndex].start).getDate()}(
+              {
+                ["일", "월", "화", "수", "목", "금", "토"][
+                  new Date(slides[selectedIndex].start).getDay()
+                ]
+              }
+              ){" "}
+              {new Date(slides[selectedIndex].start).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+              })}{" "}
+              ~{" "}
+              {new Date(slides[selectedIndex].end).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+              })}
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
 
-export default EmblaCarousel;
+export default SpecialGuestCarousel;
