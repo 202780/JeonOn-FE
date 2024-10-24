@@ -1,24 +1,17 @@
 import { api } from "@/utils/customAxios";
+import { isLoggedIn } from "./login";
 
 // 타임캡슐 생성 함수 (백엔드 연결)
 export const createTimeCapsule = async (
   mailAddress: string,
   content: string,
   isPublic: boolean,
-  images: File[]
+  images?: File[]
 ) => {
-  // token에서 userId와 nickname을 가져옴
-  const token = JSON.parse(localStorage.getItem("token") || "{}");
-
-  if (!!token) {
-    console.error(
-      "Error: 로그인 여부를 확인하세요."
-    );
-    return;
-  }
-
   // FormData 생성
   const formData = new FormData();
+  
+  // request라는 필드에 JSON 데이터를 추가
   formData.append("request", JSON.stringify({
     mail_address: mailAddress,
     content: content,
@@ -26,35 +19,23 @@ export const createTimeCapsule = async (
   }));
 
   // 이미지 파일 추가
-  images.forEach((image, index) => {
-    formData.append(`images[${index}]`, image);
+  images.forEach((image) => {
+    formData.append("images", image); // 여러 개의 이미지 추가
   });
 
   try {
-    // 백엔드로 POST 요청
-    const response = await api.post("/timecapsules", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-
-    return response.data; // 성공적으로 응답을 받은 경우 데이터 반환
+    const response = await api.post("/timecapsules", formData);
+    return response.data;
   } catch (error) {
-    console.error("타임캡슐 생성 중 오류 발생:", error);
-    throw error; // 에러 발생 시 오류를 던짐
+    console.error("타임캡슐 생성 중 오류 발생:", error.response.data);
+    throw error;
   }
 };
 
 
+
 // 타임캡슐 공개글 조회 함수 (백엔드 연결)
 export const getPublicTimeCapsules = async () => {
-  const token = JSON.parse(localStorage.getItem("token") || "{}");
-  const userId = token.userId;
-
-  if (!userId) {
-    console.error("Error: token에 userId가 없습니다. 로그인 여부를 확인하세요.");
-    return;
-  }
 
   try {
     // 백엔드에서 공개 타임캡슐을 가져옴

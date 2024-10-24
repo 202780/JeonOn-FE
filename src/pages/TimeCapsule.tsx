@@ -22,27 +22,21 @@ interface Capsule {
 export default function TimeCapsule() {
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [capsules, setCapsules] = useState<Capsule[]>([]); // 공개된 타임캡슐
+  const [loading, setLoading] = useState(false);
 
   const fetchCapsules = async () => {
     try {
-      const data = await getPublicTimeCapsules();
-
-      if (data && data.success) {
-        setCapsules(
-          data.publicTimecapsules.filter((capsule: Capsule) => capsule.isPublic)
-        ); // 공개된 타임캡슐만 필터링
-      } else {
-        setCapsules([]);
+      setLoading(true);
+      const response = await getPublicTimeCapsules();
+      if (response.success) {
+        setCapsules(response.timecapsules);
       }
-    } catch (error) {
-      console.error("Error fetching time capsules:", error);
-      setCapsules([]);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchCapsules();
-  }, []);
 
   // 로그인 여부 확인 후 타임캡슐 모달 또는 로그인 모달 띄우기
   const handleRegisterClick = () => {
@@ -64,17 +58,21 @@ export default function TimeCapsule() {
     }
   };
 
-  // 관리자 모드 생긴 후 반영하기
   const handleDeleteCapsule = async (timeCapsuleId: number) => {
     try {
-      console.log(`Trying to delete time capsule with ID: ${timeCapsuleId}`);
-      await deleteTimeCapsule(timeCapsuleId); // 삭제 요청
-      console.log(`Deleted time capsule with ID: ${timeCapsuleId}`);
-      await fetchCapsules(); // 타임캡슐 목록 다시 불러오기
-    } catch (error) {
-      console.error("Error deleting time capsule:", error);
+      setLoading(true);
+      await deleteTimeCapsule(timeCapsuleId);
+      fetchCapsules(); // 타임캡슐 목록 새로고침
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchCapsules();
+  }, []);
 
   return (
     <div className="bg-black flex flex-col items-center min-h-screen p-4 md:p-10 lg:p-20">
@@ -106,27 +104,33 @@ export default function TimeCapsule() {
         <p>비방, 욕설 등 부적절한 글은 작성이 제한되며, 삭제될 수 있습니다.</p>
       </div>
 
-      {/* 공개된 타임캡슐 목록 */}
-      {capsules.length > 0 ? (
-        <div className="mt-10 max-w-lg w-full bg-black text-white flex flex-col mb-10 space-y-5">
-          {capsules.map((capsule, index) => (
-            <CapsuleComment
-              key={index}
-              detail={capsule.content}
-              nickname={capsule.nickname}
-              date={capsule.created_at}
-              images={capsule.images || []}
-              isPublic={capsule.isPublic}
-            />
-          ))}
-        </div>
-      ) : null}
+      {loading ? (
+        <p>로딩 중...</p>
+      ) : (
+        <>
+          {/* 공개된 타임캡슐 목록 */}
+          {capsules.length > 0 ? (
+            <div className="mt-10 max-w-lg w-full bg-black text-white flex flex-col mb-10 space-y-5">
+              {capsules.map((capsule, index) => (
+                <CapsuleComment
+                  key={index}
+                  detail={capsule.content}
+                  nickname={capsule.nickname}
+                  date={capsule.created_at}
+                  images={capsule.images || []}
+                  isPublic={capsule.isPublic}
+                />
+              ))}
+            </div>
+          ) : null}
 
-      {/* 등록된 타임캡슐이 없을 경우 문구 표시 */}
-      {capsules.length === 0 && (
-        <p className="text-[#00ff00] mt-10 text-xs text-center">
-          아직 공개적으로 등록된 타임캡슐이 없습니다.
-        </p>
+          {/* 등록된 타임캡슐이 없을 경우 문구 표시 */}
+          {capsules.length === 0 && (
+            <p className="text-[#00ff00] mt-10 text-xs text-center">
+              아직 공개적으로 등록된 타임캡슐이 없습니다.
+            </p>
+          )}
+        </>
       )}
 
       {/* 로그인 모달 */}
