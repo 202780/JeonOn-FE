@@ -1,0 +1,27 @@
+{
+  "theme_color": "#000000",
+  "background_color": "#000000",
+  "icons": [
+    {
+      "purpose": "maskable",
+      "sizes": "512x512",
+      "src": "icons/icon512_maskable.png",
+      "type": "image/png"
+    },
+    {
+      "purpose": "any",
+      "sizes": "512x512",
+      "src": "icons/icon512_rounded.png",
+      "type": "image/png"
+    }
+  ],
+  "orientation": "any",
+  "display": "standalone",
+  "dir": "auto",
+  "lang": "ko-KR",
+  "name": "전대미문",
+  "short_name": "전대미문",
+  "start_url": "/",
+
+  "description": "전남대학교 전대미문 축제 서비스입니다."
+}

@@ -4,10 +4,12 @@ import { Textarea } from '@/components/ui/textarea';
 import photo from '@/../public/assets/svgs/photo.svg';
 import { useRef, useState } from 'react';
 import { postContents } from '@/api/admin';
+import { useNavigate } from 'react-router-dom';
 
 export default function RegisterContents() {
   const [title, setTitle] = useState('');
   const [detail, setDetail] = useState('');
+  const router = useNavigate();
 
   const imgRef2 = useRef<HTMLInputElement>(null);
 
@@ -34,6 +36,9 @@ export default function RegisterContents() {
     try {
       const result = await postContents(formData);
       console.log(result);
+      if (result.status === 200) {
+        router('/contents');
+      }
     } catch (error) {
       console.error(error);
     }

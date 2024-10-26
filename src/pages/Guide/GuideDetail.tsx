@@ -111,7 +111,11 @@ export default function GuideDetail() {
         <div className="mb-3">
           <img src={divideLine} alt="divide-line" />
         </div>
-        <div className="text-white text-base">{data?.description}</div>
+        <div className="text-white text-base">
+          {data?.description?.split('.').map((sentence, index) => (
+            <p key={index}>{sentence.trim()}.</p>
+          ))}
+        </div>
       </div>
     </div>
   );

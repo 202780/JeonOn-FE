@@ -78,14 +78,15 @@ export default function Feedback() {
       console.log(result);
       setOpenModal((v) => !v);
     } catch (error) {
+      alert(error);
       console.error(error);
     }
   };
 
   return (
-    <div className="h-screen px-12">
+    <div className="h-screen px-8">
       <div className="flex flex-col justify-center items-center mb-9">
-        <h1 className="text-main text-3xl font-bold mb-1 font-cafe24">
+        <h1 className="text-main text-3xl font-bold mb-3 font-cafe24">
           피드백
         </h1>
         <h3 className="text-white text-xl">피드백 작성</h3>
@@ -122,7 +123,9 @@ export default function Feedback() {
                   <div className="py-2 px-5">
                     <div className="flex flex-col justify-center items-start gap-1">
                       <div>
-                        <h2 className="text-sm">축제 준비위원회</h2>
+                        <h2 className="text-sm font-semibold">
+                          축제 준비위원회
+                        </h2>
                         <p className="text-[10px]">
                           앞으로 더 나은 축제를 위한 피드백
                         </p>
@@ -132,7 +135,7 @@ export default function Feedback() {
                         </p>
                       </div>
                       <div>
-                        <h2 className="text-sm">2024 대동제</h2>
+                        <h2 className="text-sm font-semibold">2024 대동제</h2>
                         <p className="text-[10px]">
                           2024 대동제 ‘전대미문’에 대한 피드백 or
                           ‘전대미문’에서의 실시간 건의사항
@@ -143,7 +146,7 @@ export default function Feedback() {
                         </p>
                       </div>
                       <div>
-                        <h2 className="text-sm">축제 사이트</h2>
+                        <h2 className="text-sm font-semibold">축제 사이트</h2>
                         <p className="text-[10px]">축제 사이트에 대한 피드백</p>
                       </div>
                     </div>
@@ -175,7 +178,7 @@ export default function Feedback() {
               value={detail}
               onChange={(e) => setDetail(e.target.value)}
               id="detail"
-              placeholder="피드백"
+              placeholder="피드백 상세내용"
               className="bg-white min-h-56 max-h-64"
             />
           </div>
@@ -188,13 +191,11 @@ export default function Feedback() {
             </div>
             <div className="relative">
               <Input
-                multiple
                 id="photo"
                 type="file"
                 accept="image/*"
                 className="bg-white"
                 ref={imgRef}
-                // onChange={(e)=>}
               />
               <img src={photo} alt="photo" className="absolute top-2 right-2" />
             </div>

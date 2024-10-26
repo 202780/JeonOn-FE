@@ -24,19 +24,15 @@ export default function GuideCarousel({ images, handleIndex }: any) {
           imageArray.map((img: string, i: number) => (
             <SwiperSlide key={i}>
               <div>
-                <div className="w-full h-80 rounded-3xl mb-5">
-                  <img className="w-full h-full" src={img} alt={`image-${i}`} />
+                <div className="mb-5">
+                  <img src={img} alt={`image-${i}`} />
                 </div>
               </div>
             </SwiperSlide>
           ))
         ) : (
           // images가 없을 경우 빈 슬라이드 렌더링
-          <SwiperSlide>
-            <div>
-              <div className="w-full h-80 rounded-3xl mb-5"></div>
-            </div>
-          </SwiperSlide>
+          <SwiperSlide></SwiperSlide>
         )}
       </Swiper>
     </div>

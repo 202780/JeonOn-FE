@@ -15,6 +15,6 @@ export async function getContentsBookmark() {
 }
 
 export async function getBoothsBookmark() {
-  const res = await api.get('/users/bookmarks/bootha');
-  return res;
+  const res = await api.get('/users/bookmarks/booths');
+  return res.data.data;
 }

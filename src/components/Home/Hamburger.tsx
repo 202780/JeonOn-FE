@@ -6,6 +6,7 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import hamburger from '@/../public/assets/svgs/hamburger.svg';
+import { checkAdminToken } from '@/utils/tokenHandler';
 // import { DropdownMenuCheckboxItemProps } from '@radix-ui/react-dropdown-menu';
 
 // type Checked = DropdownMenuCheckboxItemProps['checked'];
@@ -14,6 +15,7 @@ export default function Hamburger() {
   //   const [showStatusBar, setShowStatusBar] = useState<Checked>(true);
   //   const [showActivityBar, setShowActivityBar] = useState<Checked>(false);
   //   const [showPanel, setShowPanel] = useState<Checked>(false);
+
   const navigate = useNavigate();
   return (
     <div>
@@ -48,7 +50,9 @@ export default function Hamburger() {
           <DropdownMenuCheckboxItem onClick={() => navigate('/feedback')}>
             피드백
           </DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem disabled>관리자</DropdownMenuCheckboxItem>
+          <DropdownMenuCheckboxItem disabled={checkAdminToken() ? false : true}>
+            관리자
+          </DropdownMenuCheckboxItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

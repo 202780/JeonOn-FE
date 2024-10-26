@@ -2,6 +2,7 @@ import { RouterProvider } from 'react-router-dom';
 import router from './Router';
 import RQProvider from './components/ReactQueryProvider';
 import LoadingScreen from './components/LoadingScreen';
+import { Analytics } from '@vercel/analytics/react';
 // import { useEffect } from 'react';
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
       <div id="google_translate_element">
         <RouterProvider router={router} />
         <LoadingScreen />
+        <Analytics />
       </div>
     </RQProvider>
   );

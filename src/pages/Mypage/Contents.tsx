@@ -11,6 +11,7 @@ export default function Contents() {
     queryKey: ['my-announcement'],
     queryFn: getContentsBookmark,
   });
+  console.log(data);
   return (
     <div className="h-screen">
       <div className="mb-8">
@@ -31,7 +32,7 @@ export default function Contents() {
               onClick={() => navigate(`/contents/${item.id}`)}
             >
               <div className="flex justify-between items-start">
-                <h3 className="text-xl text-[#0F0]">{item.name}</h3>
+                <h3 className="text-xl text-[#0F0]">{item.title}</h3>
                 <div>
                   {item.bookmark && <img src={favorites} alt="favorites" />}
                 </div>
