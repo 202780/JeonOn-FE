@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import BoothCategory from "@/components/ui/booth-category";
 import BoothDate from "@/components/Booth/BoothDate";
 import BoothCards from "@/components/Booth/BoothCards";
+import { FilledBtn } from "@/components/common/Button/filled-btn";
+import { isLoggedIn } from "@/api/login";
 
 export default function Booth() {
   const navigate = useNavigate();
@@ -29,6 +31,9 @@ export default function Booth() {
     navigate(`/booth/${boothId}${categoryQuery}`); // 카테고리가 없으면 쿼리에서 제외
   };
 
+  const adminToken =
+    "eyJhbGciOiJIUzI1NiJ9.eyJuaWNrbmFtZSI6ImFkbWluIiwicm9sZSI6IlJPTEVfVVNFUiIsImlhdCI6MTcyOTI3MjE1MSwiZXhwIjoxNzI5ODc2OTUxfQ.TTVtY67gKeB0CnUuqKO74BD5jzxpgCTuvi1TMGelXsM";
+
   return (
     <div className="h-screen flex flex-col items-center">
       <h1 className="text-main text-4xl font-cafe24">부스</h1>
@@ -50,6 +55,14 @@ export default function Booth() {
         selectedCategories={selectedCategories}
         onCardSelect={handleCardSelect} // 부스 선택 시 호출
       />
+
+      {/* 관리자일 때 부스 등록 가능 */}
+      {isLoggedIn() === adminToken && (
+        <FilledBtn 
+          className="fixed bottom-5 right-30 px-5 text-xl shadow-lg shadow-[#555555]"
+          onClick={() => {navigate('/admin-page/register-booth')}}
+        > 등록하기 </FilledBtn>
+      )}
     </div>
   );
 }

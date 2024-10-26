@@ -4,6 +4,7 @@ import useBookmark from "@/hook/useBookmark";
 import SignInModal from "@/components/common/Modal/SignInModal";
 import time from "@/../public/assets/svgs/time_white.svg";
 import location from "@/../public/assets/svgs/location_white.svg";
+import deleteIcon from "@/../public/assets/svgs/delete_white.svg";
 import comment from "@/../public/assets/svgs/comment.svg";
 import bookmark_empty from "@/../public/assets/svgs/bookmark_empty.svg";
 import bookmark_filled from "@/../public/assets/svgs/bookmark_filled.svg";
@@ -12,7 +13,7 @@ import NewBoothComment from "@/components/Booth/NewBoothComment";
 import BoothCarousel from "@/components/Booth/BoothCarousel";
 import LikingBooth from "@/components/Booth/LikingBooth";
 import { isLoggedIn } from "@/api/login";
-import { boothBookmark, cancelBoothBookmark } from "@/api/booth";
+import { deleteBooth, boothBookmark, cancelBoothBookmark } from "@/api/booth";
 
 export default function BoothDetail() {
   const [searchParams] = useSearchParams();
@@ -45,6 +46,9 @@ export default function BoothDetail() {
   if (!boothData) {
     return <div className="text-white">Loading...</div>;
   }
+
+  const adminToken =
+    "eyJhbGciOiJIUzI1NiJ9.eyJuaWNrbmFtZSI6ImFkbWluIiwicm9sZSI6IlJPTEVfVVNFUiIsImlhdCI6MTcyOTI3MjE1MSwiZXhwIjoxNzI5ODc2OTUxfQ.TTVtY67gKeB0CnUuqKO74BD5jzxpgCTuvi1TMGelXsM";
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-black p-5">
@@ -112,6 +116,18 @@ export default function BoothDetail() {
                   {commentCount}
                 </span>
               </div>
+
+              {/* 관리자일때 부스 삭제 가능 */}
+              {isLoggedIn() === adminToken && (
+                <img
+                  src={deleteIcon}
+                  alt="delete"
+                  className="fixed bottom-5 right-30 px-5 text-xl shadow-lg shadow-[#555555]"
+                  onClick={() => {
+                    deleteBooth(Number(id));
+                  }}
+                />
+              )}
             </div>
           </div>
 

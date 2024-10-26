@@ -1,10 +1,10 @@
-import * as React from 'react';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { login } from '@/api/login';
+import * as React from "react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { login } from "@/api/login";
 
 interface SignInModalProps {
   isOpen: boolean;
@@ -12,15 +12,19 @@ interface SignInModalProps {
   onLoginSuccess?: () => void;
 }
 
-export default function SignInModal({ isOpen, setIsOpen, onLoginSuccess }: SignInModalProps) {
-  const [nickname, setNickname] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+export default function SignInModal({
+  isOpen,
+  setIsOpen,
+  onLoginSuccess,
+}: SignInModalProps) {
+  const [nickname, setNickname] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
 
   // 로그인 요청 처리
   const loginMutation = useMutation<{ token: string }, Error, void>({
     mutationFn: async () => {
       const response = await login(nickname, password);
-      console.log('로그인 응답:', response); // 응답 확인을 위한 로그 추가
+      console.log("로그인 응답:", response); // 응답 확인을 위한 로그 추가
 
       return response;
     },
