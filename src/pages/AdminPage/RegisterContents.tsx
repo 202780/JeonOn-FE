@@ -11,13 +11,40 @@ export default function RegisterContents() {
   const [detail, setDetail] = useState('');
   const router = useNavigate();
 
+  const [images, setImages] = useState<File[]>([]);
+
   const imgRef2 = useRef<HTMLInputElement>(null);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const selectedFiles = Array.from(e.target.files);
+
+      if (images.length + selectedFiles.length > 3) {
+        alert('이미지는 최대 3장까지 업로드할 수 있습니다.');
+        return;
+      }
+
+      setImages((prevImages) => [...prevImages, ...selectedFiles]);
+    }
+  };
+
+  const handleImageRemove = (index: number) => {
+    setImages((prevImages) => prevImages.filter((_, i) => i !== index));
+
+    if (imgRef2.current) {
+      imgRef2.current.value = '';
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData();
     const imgs = imgRef2.current?.files;
     if (imgs) {
+      if (imgs.length > 3) {
+        imgRef2.current.value = '';
+        return alert('이미지는 최대 3장입니다!');
+      }
       for (let i = 0; i < Math.min(3, imgs.length); i++) {
         formData.append('images', imgs[i]);
       }
@@ -40,6 +67,7 @@ export default function RegisterContents() {
         router('/contents');
       }
     } catch (error) {
+      alert(error);
       console.error(error);
     }
   };
@@ -62,6 +90,7 @@ export default function RegisterContents() {
             제목
           </Label>
           <Input
+            placeholder="콘텐츠 제목"
             required
             id="contents_title"
             type="text"
@@ -75,6 +104,7 @@ export default function RegisterContents() {
             콘텐츠 설명
           </Label>
           <Textarea
+            placeholder="콘텐츠에 대해 상세하게 설명해 주세요."
             required
             id="contents_detail"
             onChange={(e) => setDetail(e.target.value)}
@@ -94,11 +124,31 @@ export default function RegisterContents() {
               type="file"
               accept="image/*"
               className="bg-white"
+              onChange={handleImageChange}
               ref={imgRef2}
             />
             <img src={photo} alt="photo" className="absolute top-2 right-2" />
           </div>
+          <div className="flex flex-wrap gap-2 mt-2">
+            {images.map((image, index) => (
+              <div key={index} className="relative">
+                <img
+                  src={URL.createObjectURL(image)}
+                  alt={`preview-${index}`}
+                  className="w-20 h-20 object-cover rounded-md"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleImageRemove(index)}
+                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
+
         <div className="flex flex-col mx-10 gap-2"></div>
         <div className="flex justify-end mt-5 mx-10">
           <button

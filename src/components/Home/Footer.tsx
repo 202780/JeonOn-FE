@@ -2,7 +2,7 @@ import instagram from '@/../public/assets/svgs/instagram.svg';
 
 export default function Footer() {
   return (
-    <div className="px-4 flex flex-col justify-center items-center mb-5">
+    <div className="px-4 flex flex-col justify-center items-center mb-5 bg-transparent">
       <div className="text-xs font-normal text-white">
         ©JeonOn. All rights reserved.
       </div>

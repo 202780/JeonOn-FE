@@ -26,8 +26,3 @@
 .react-datepicker__day--selected {
   @apply bg-main rounded-full text-black;
 }
-
-/* 시간 입력 필드 스타일링 */
-.react-datepicker-time__input {
-  @apply bg-white rounded-sm font-pretendard h-6
-}

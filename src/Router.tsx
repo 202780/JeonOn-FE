@@ -44,44 +44,44 @@ const router = createBrowserRouter([
         element: <Feedback />,
       },
       {
-        path: "/guide",
+        path: '/guide',
         element: <Guide />,
       },
       {
-        path: "/guide/:id",
+        path: '/guide/:id',
         element: <GuideDetail />,
       },
       {
-        path: "/contents",
+        path: '/contents',
         element: <Contents />,
       },
       {
-        path: "/contents/:id",
+        path: '/contents/:id',
         element: <ContentsDetail />,
       },
       {
-        path: "/booth",
+        path: '/booth',
         element: <Booth />,
       },
       {
-        path: "/booth/:id",
+        path: '/booth/:id',
         element: <BoothDetail />,
       },
       {
-        path: "/booth/search",
+        path: '/booth/search',
         element: <BoothSearch />,
       },
+      // {
+      //   path: "/time-table",
+      //   element: <TimeTable />,
+      // },
       {
-        path: "/time-table",
-        element: <TimeTable />,
-      },
-      {
-        path: "/my-page",
+        path: '/my-page',
         element: <MyPage />,
         loader: checkAuthLoader,
       },
       {
-        path: "/my-page/favorites",
+        path: '/my-page/favorites',
         element: <Favorites />,
       },
       {
@@ -89,7 +89,7 @@ const router = createBrowserRouter([
         element: <MyContents />,
       },
       {
-        path: "/my-page/favorites/affiliate",
+        path: '/my-page/favorites/affiliate',
         element: <Affiliation />,
       },
       {

@@ -5,6 +5,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { replace, useNavigate } from 'react-router-dom';
 
 export default function DeleteModal({
   isOpen,
@@ -15,29 +16,26 @@ export default function DeleteModal({
   queryKeyOptions = null,
 }) {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const deleteMutation = useMutation({
     mutationFn: async () => {
       deleteFn(id);
     },
-    onSuccess: () => {
-      const key =
-        queryKeyOptions === false ? `${queryKey},${queryKeyOptions}` : queryKey;
+    onSuccess: async () => {
+      // queryClient.setQueryData([queryKey], (oldData: any) => {
+      //   if (!oldData) return [];
+      //   return oldData.filter((item: any) => item.id !== id);
+      // });
 
-      console.log(typeof key, key);
+      await queryClient.invalidateQueries(queryKey);
 
-      queryClient.setQueryData([key], async (oldData: any) => {
-        console.log(oldData);
-        if (!oldData) {
-          return null;
-        }
-        return oldData.filter((item: any) => item.id !== id);
-      });
       setIsOpen(false);
+      navigate(`/${queryKey}`, { replace: true });
     },
+
     onError: (error) => {
       alert(error.message);
     },
-    onSettled: () => {},
   });
 
   const handleDelete = async () => {

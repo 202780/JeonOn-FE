@@ -3,19 +3,25 @@ import location_black from "@/../public/assets/svgs/location_black.svg";
 import location_white from "@/../public/assets/svgs/location_white.svg";
 import { useState, useRef, useEffect } from "react";
 import { EventType } from "@/constants/events";
+import down_arrow from "@/../public/assets/svgs/down_arrow.svg";
 
-const Now = ({ nowActive }: { nowActive: boolean }) => {
-  return (
-    <div
-      className={`flex mr-1 justify-center font-pretendard items-center bg-main font-black text-black rounded-3xl w-12 h-7
-        ${nowActive ? "visible" : "invisible"}`}
-    >
-      NOW
-    </div>
-  );
-};
+const Now = ({
+  nowActive,
+  isNow,
+}: {
+  nowActive?: boolean;
+  isNow?: boolean;
+}) => (
+  <div
+    className={`flex mr-0.5 justify-center font-pretendard items-center font-black text-black text-xs rounded-3xl w-10 h-7 flex-shrink-0 ${
+      nowActive ? "visible" : "invisible"
+    } ${isNow ? "bg-main" : "bg-slate-300"}`}
+  >
+    NOW
+  </div>
+);
 
-const EventDetils = ({
+const EventDetails = ({
   event,
   nowActive,
   isTopSection,
@@ -23,49 +29,47 @@ const EventDetils = ({
   event: EventType;
   nowActive: boolean;
   isTopSection: boolean;
-}) => {
-  return (
-    <>
-      <div className="flex items-center gap-1.5 backdrop:w-full">
-        <Now nowActive={nowActive} />
-        <span className="truncate">
-          {new Date(event.start).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-          })}
-          ~
-          {new Date(event.end).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-          })}
-        </span>
-        <span className="truncate">{event.content}</span>
-      </div>
-      <div className="flex gap-1.5 ml-auto mr-2">
-        <img
-          src={
-            isTopSection
-              ? location_black
-              : nowActive
-              ? location_white
-              : location_black
-          }
-        />
-        <span className="truncate">{event.location}</span>
-      </div>
-    </>
-  );
-};
+}) => (
+  <div className="grid grid-cols-[75%_25%] w-full">
+    <div className="flex flex-row items-center gap-1.5 justify-start">
+      <Now nowActive={nowActive} isNow={true} />
+      <span className="truncate">
+        {new Date(event.start).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        })}
+        ~
+        {new Date(event.end).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        })}
+      </span>
+      <span className="truncate">{event.content}</span>
+    </div>
+    <div className="flex items-center gap-1.5 ml-auto mr-2">
+      <img
+        src={
+          isTopSection
+            ? location_black
+            : nowActive
+            ? location_white
+            : location_black
+        }
+      />
+      <span className="truncate">{event.location}</span>
+    </div>
+  </div>
+);
 
 type ArcodionProps = {
   events: EventType[];
 };
 
 const Arcodion: React.FC<ArcodionProps> = ({ events }) => {
-  const [open, setOpen] = useState<boolean>(false);
-  const [currentTime, setCurrentTime] = useState<Date>();
+  const [open, setOpen] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
   const arcodionRef = useRef<HTMLDivElement | null>(null);
 
   const handleClickOutside = (event: MouseEvent) => {
@@ -77,9 +81,7 @@ const Arcodion: React.FC<ArcodionProps> = ({ events }) => {
     }
   };
 
-  const handleInteraction = () => {
-    setOpen(!open);
-  };
+  const handleInteraction = () => setOpen((prev) => !prev);
 
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
@@ -89,19 +91,38 @@ const Arcodion: React.FC<ArcodionProps> = ({ events }) => {
   }, []);
 
   useEffect(() => {
-    const updateCurrentTime = () => {
-      // 배포 시 변경 필요
-      setCurrentTime(new Date("2024-11-05T12:00:00"));
+    const updateTime = () => {
+      const now = new Date();
+      console.log(`Current Time Updated: ${now.toLocaleTimeString()}`); // 콘솔에 시간 출력
+      setCurrentTime(now);
     };
-    updateCurrentTime();
 
-    // 1분마다 업데이트
-    const intervalId = setInterval(updateCurrentTime, 60000);
-    return () => clearInterval(intervalId);
+    // 첫 렌더링 시 즉시 시간 출력
+    updateTime();
+
+    const scheduleUpdate = () => {
+      const now = new Date();
+      const msUntilNextMinute =
+        (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
+
+      console.log(`[Scheduled]: Next update in ${msUntilNextMinute}ms`); // 스케줄 정보 출력
+
+      const timeoutId = setTimeout(() => {
+        updateTime(); // 첫 00초 업데이트
+        const intervalId = setInterval(updateTime, 60000); // 이후 1분마다 업데이트
+
+        // Cleanup 함수에서 interval 정리
+        return () => clearInterval(intervalId);
+      }, msUntilNextMinute);
+
+      return () => clearTimeout(timeoutId);
+    };
+
+    const cancelTimeout = scheduleUpdate();
+    return cancelTimeout;
   }, []);
 
   const isCurrentEvent = (start: string, end: string) => {
-    if (!currentTime) return false;
     const startTime = new Date(start);
     const endTime = new Date(end);
     return currentTime >= startTime && currentTime < endTime;
@@ -116,31 +137,32 @@ const Arcodion: React.FC<ArcodionProps> = ({ events }) => {
       {!open ? (
         <div
           onClick={handleInteraction}
-          className="flex items-center w-full h-12 bg-white rounded-3xl py-2.5 px-3 gap-1"
+          className="flex flex-row justify-between items-center w-full h-14 bg-white rounded-3xl py-2 px-2.5 gap-1"
         >
           {currentEvent ? (
-            <EventDetils
+            <EventDetails
               event={currentEvent}
               nowActive={true}
               isTopSection={true}
             />
           ) : (
-            <div className="ml-2 font-pretendard text-gray-400 text-xs">
-              진행 중인 이벤트가 없습니다.
-            </div>
+            <Now isNow={false} nowActive={true} />
           )}
+          <div className="mr-1">
+            <img src={down_arrow} />
+          </div>
         </div>
       ) : (
         <div className="flex flex-col gap-5 items-start w-full h-72 bg-white rounded-3xl overflow-y-auto overflow-hidden">
           <div className="flex flex-col w-full h-full py-2 px-2">
             {events.map((event) => {
               const nowActive = isCurrentEvent(event.start, event.end);
-              const nowClasses = `rounded-3xl gap-2 w-full h-12 flex flex-row items-center py-2.5 px-3 ${
+              const nowClasses = `rounded-3xl gap-2 w-full h-12 flex flex-row items-center py-2.5 px-2.5 ${
                 nowActive ? "bg-black text-white" : "bg-none text-black"
               } `;
               return (
                 <div className={nowClasses} key={event.order}>
-                  <EventDetils
+                  <EventDetails
                     event={event}
                     nowActive={nowActive}
                     isTopSection={false}

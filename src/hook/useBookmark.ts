@@ -2,20 +2,20 @@ import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export default function useBookmark({
-  id, // 북마크 대상의 ID
-  queryKey, // 쿼리 키 (예: 'partners-detail', 'contents-detail' 등)
-  bookmarkFn, // 북마크 추가 함수
-  bookmarkCancelFn, // 북마크 취소 함수
-  initialBookmarkState, // 초기 북마크 상태
+  id,
+  queryKey,
+  bookmarkFn,
+  bookmarkCancelFn,
+  initialBookmarkState,
 }: {
   id: any;
   queryKey: string;
   bookmarkFn: (id: any) => Promise<any>;
   bookmarkCancelFn: (id: any) => Promise<any>;
-  initialBookmarkState: boolean | null; // 서버에서 받아온 북마크 상태
+  initialBookmarkState: boolean | null;
 }) {
   const queryClient = useQueryClient();
-  const [like, setLike] = useState(initialBookmarkState || false); // 북마크 상태를 관리
+  const [like, setLike] = useState(initialBookmarkState || false);
 
   const mutation = useMutation({
     mutationFn: async (userAction: 'UNLIKE' | 'LIKE') => {

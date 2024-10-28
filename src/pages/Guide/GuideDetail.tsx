@@ -3,6 +3,7 @@ import favorites from '@/../public/assets/svgs/guide/favorites.svg';
 import divideLine from '@/../public/images/divideLine.png';
 import calendar from '@/../public/assets/svgs/guide/calendar.svg';
 import location from '@/../public/assets/svgs/guide/location.svg';
+import trashCan from '@/../public/svgs/bigDelete.svg';
 
 import GuideCarousel from '@/components/guide/GuideCarousel';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -16,6 +17,11 @@ import {
 import { formatDateToYYYYMMDD } from '@/utils/dateStr';
 
 import useBookmark from '@/hook/useBookmark';
+import { useState } from 'react';
+import SignInModal from '@/components/common/Modal/SignInModal';
+import { getAuthToken } from '@/utils/tokenHandler';
+import DeleteModal from '@/components/common/Modal/DeleteModal';
+import { deletePartners } from '@/api/admin';
 
 // type TPartnersDetail = {
 //   name: string;
@@ -30,6 +36,12 @@ import useBookmark from '@/hook/useBookmark';
 
 export default function GuideDetail() {
   const { id } = useParams();
+  const [activeModal, setActiveModal] = useState(false);
+  const [deletModalOpen, setDeleteModalOpen] = useState(false);
+
+  const handleDeleteClick = () => {
+    setDeleteModalOpen(true);
+  };
 
   const { data } = useQuery({
     queryKey: ['partners-detail', id],
@@ -81,7 +93,15 @@ export default function GuideDetail() {
         </div>
         <div className="mb-1 flex justify-between items-center">
           <h1 className="text-[#0F0] text-3xl font-cafe24">{data?.name}</h1>
-          <div onClick={toggleBookmark}>
+          <div
+            onClick={() => {
+              if (getAuthToken() === null) {
+                setActiveModal(true);
+                return;
+              }
+              toggleBookmark();
+            }}
+          >
             {like ? (
               <img src={favorites} alt="favorites" />
             ) : (
@@ -108,6 +128,13 @@ export default function GuideDetail() {
           </span>
         </div>
 
+        <div
+          className="flex justify-end items-end mb-2"
+          onClick={() => handleDeleteClick()}
+        >
+          <img src={trashCan} alt="delete-icon" />
+        </div>
+
         <div className="mb-3">
           <img src={divideLine} alt="divide-line" />
         </div>
@@ -117,6 +144,19 @@ export default function GuideDetail() {
           ))}
         </div>
       </div>
+      {/* 삭제 모달 컴포넌트 */}
+      <DeleteModal
+        isOpen={deletModalOpen}
+        id={id}
+        setIsOpen={setDeleteModalOpen}
+        queryKey={'guide'}
+        deleteFn={deletePartners}
+      />
+      {/* 로그인 모달 */}
+      <SignInModal
+        isOpen={activeModal}
+        setIsOpen={() => setActiveModal(false)}
+      />
     </div>
   );
 }

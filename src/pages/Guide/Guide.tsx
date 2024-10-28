@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import favorites from '@/../public/assets/svgs/favorites.svg';
 import bookmark from '@/../public/assets/svgs/bookmark_empty.svg';
 import love from '@/../public/svgs/love.svg';
@@ -8,7 +8,7 @@ import backGate from '@/../public/images/back-gate.png';
 import square from '@/../public/images/518-square.png';
 import stadium from '@/../public/images/stadium.png';
 
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import GuideCarousel from '@/components/guide/GuideCarousel';
 import { useQuery } from '@tanstack/react-query';
 import { getZones, getPartners } from '@/api/guide';
@@ -29,6 +29,8 @@ export default function Guide() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const navigate = useNavigate();
+  const location = useLocation();
+
   const clickedStyle =
     'text-xl text-[#0F0] border-b-2 border-[#0F0] h-12 px-2 flex justify-center items-center';
   const defaultStyle =
@@ -37,6 +39,26 @@ export default function Guide() {
   const handleIndex = (index: any) => {
     setCurIndex(index);
   };
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const currentView = searchParams.get('view');
+    if (location?.state?.key === false) {
+      setClicked(false);
+    }
+
+    const newView = clicked ? 'map' : 'partners';
+    if (currentView !== newView) {
+      searchParams.set('view', newView);
+      navigate(
+        {
+          pathname: location.pathname,
+          search: searchParams.toString(),
+        },
+        { replace: true },
+      );
+    }
+  }, [clicked, navigate, location]);
 
   const { data } = useQuery({
     queryKey: ['guide', clicked],
@@ -57,7 +79,7 @@ export default function Guide() {
     setOpen(true);
   };
 
-  const images = [backGate, square, stadium];
+  const images = [stadium, square, backGate];
 
   return (
     <div className="h-screen overflow-x-hidden">
@@ -108,11 +130,6 @@ export default function Guide() {
                   <span className="text-[10px] text-white">
                     {formatDateToYYYYMMDD(item.created_at)}
                   </span>
-                  {checkAdminToken() ? (
-                    <div onClick={(e) => handleDeleteClick(item.id, e)}>
-                      <img src={trashCan} alt="delete" />
-                    </div>
-                  ) : null}
                 </div>
               </div>
             ))}
@@ -124,7 +141,7 @@ export default function Guide() {
             <GuideCarousel images={images} handleIndex={handleIndex} />
           </div>
           <RegisterButton path={'map'} />
-          <div className="w-full bg-map rounded-xl border border-[#0F0] flex flex-col">
+          <div className="w-full bg-map rounded-xl border border-[#0F0] flex flex-col mb-5">
             {mapInfo.data?.data.map((item: any, index: any) => (
               <div className="px-3 relative" key={item.id}>
                 <div
@@ -157,15 +174,7 @@ export default function Guide() {
           </div>
         </div>
       )}
-      {/* 모달 컴포넌트 */}
-      <DeleteModal
-        isOpen={open}
-        id={selectedId}
-        setIsOpen={setOpen}
-        queryKey={'guide'}
-        queryKeyOptions={clicked}
-        deleteFn={deletePartners}
-      />
+
       {/* 모달 컴포넌트 */}
       <DeleteModal
         isOpen={open}

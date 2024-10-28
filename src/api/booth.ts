@@ -37,8 +37,8 @@ export async function postBooth(data: BoothType) {
     );
     formData.append("request", requestBlob);
 
-    data.images?.forEach((image, index) => {
-      formData.append(`images[${index}]`, image);
+    data.images.forEach((image) => {
+      formData.append("images", image); 
     });
 
     const result = await api.post("admins/booths", formData, {
@@ -48,10 +48,11 @@ export async function postBooth(data: BoothType) {
     console.log("Booth registered: ", result);
     return result;
   } catch (error) {
-    console.error("Booth registeration failed: ", error);
+    console.error("Booth registration failed: ", error);
     throw error;
   }
 }
+
 
 export async function deleteBooth(boothId: number) {
   const result = await api.delete(`admins/booths/${boothId}`);

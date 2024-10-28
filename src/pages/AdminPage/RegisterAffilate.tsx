@@ -33,6 +33,10 @@ const RegisterAffiliate = () => {
 
       if (images.length + selectedFiles.length > 3) {
         alert("이미지는 최대 3장까지 업로드할 수 있습니다.");
+
+        if (imgRef.current) {
+          imgRef.current.value = "";
+        }
         return;
       }
 
@@ -47,9 +51,18 @@ const RegisterAffiliate = () => {
       imgRef.current.value = "";
     }
   };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (!startDate || !endDate) {
+      alert("제휴 기간의 시작일과 종료일을 선택해주세요.");
+      return;
+    }
+
+    if (startDate > endDate) {
+      alert("제휴 기간의 시작일은 종료일보다 빠르거나 같아야 합니다.");
+      return;
+    }
 
     const data = {
       name,
@@ -87,6 +100,7 @@ const RegisterAffiliate = () => {
             매장명
           </Label>
           <Input
+            placeholder="매장명"
             required
             id="affiliate_name"
             type="text"
@@ -100,6 +114,7 @@ const RegisterAffiliate = () => {
             매장 위치(선택)
           </Label>
           <Input
+            placeholder="매장 위치 설명"
             id="affiliate_location"
             type="text"
             onChange={(e) => setLocation(e.target.value)}
@@ -128,6 +143,7 @@ const RegisterAffiliate = () => {
             내용
           </Label>
           <Textarea
+            placeholder="제휴 내용을 상세하게 설명해주세요."
             required
             id="affiliate_description"
             value={description}
@@ -162,7 +178,7 @@ const RegisterAffiliate = () => {
                 <button
                   type="button"
                   onClick={() => handleImageRemove(index)}
-                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center shadow-md"
                 >
                   ×
                 </button>

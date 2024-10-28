@@ -19,7 +19,15 @@ export default function Layout() {
         {pathname === '/' ? (
           <div></div>
         ) : (
-          <div onClick={() => navigate(-1)}>
+          <div
+            onClick={() => {
+              if (pathname.startsWith('/guide/')) {
+                console.log(1);
+                return navigate('/guide', { state: { key: false } });
+              }
+              navigate(-1);
+            }}
+          >
             <img src={back} alt="backArrow" />
           </div>
         )}

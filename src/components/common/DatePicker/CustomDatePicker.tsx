@@ -12,16 +12,16 @@ type CustomInputProps = {
 
 const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
   ({ value, onClick }, ref) => (
-    <div className="relative flex items-center">
+    <div className="flex w-full">
       <Input
         placeholder="yyyy-mm-dd"
-        required
         value={value}
         ref={ref}
         readOnly
-        className="font-pretendard bg-white text-black text-sm px-2 py-1 border rounded-md w-40"
+        className="font-pretendard bg-white text-black text-sm border rounded-md"
       />
       <button
+        type="button"
         onClick={onClick}
         className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-white p-1"
       >
